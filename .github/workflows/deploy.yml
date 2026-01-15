@@ -24,7 +24,7 @@ jobs:
       
       - name: Run validation script
         run: |
-          cd projects/internal-developer-platform
+          chmod +x scripts/validate.sh
           bash scripts/validate.sh
 
   deploy:
@@ -52,7 +52,6 @@ jobs:
       
       - name: Deploy to Kubernetes
         run: |
-          cd projects/internal-developer-platform
           python3 scripts/deploy.py \
             --app sample-app \
             --manifest kubernetes/deployment.yaml \
