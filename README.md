@@ -32,12 +32,16 @@ A self-service platform enabling developers to deploy applications without infra
 └─────────────┘      └──────────────┘      └─────────────┘      │   security)  │
                                                                   └──────┬───────┘
                                                                          │
+                                                                         ▼
+                                                                  ┌──────────────┐
+                                                                  │  Terraform   │
+                                                                  │   (infra)    │
+                                                                  └──────┬───────┘
+                                                                         │
 ┌─────────────┐      ┌──────────────┐      ┌─────────────┐            │
 │   Success/  │◀─────│ Health Check │◀─────│  Kubernetes │◀───────────┘
-│  Rollback   │      │  (probe pods)│      │   Deploy    │      ┌─────────────┐
-└─────────────┘      └──────────────┘      └─────────────┘      │  Terraform  │
-                                                  ▲               │   (infra)   │
-                                                  └───────────────┴─────────────┘
+│  Rollback   │      │  (probe pods)│      │   Deploy    │
+└─────────────┘      └──────────────┘      └─────────────┘
 ```
 
 **Real deployment time:** 15 minutes average (tracked in metrics)
