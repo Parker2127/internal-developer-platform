@@ -1,8 +1,8 @@
 # Internal Developer Platform (IDP)
 
-> **Portfolio Showcase Project** - Demonstrates production-ready IaC, CI/CD pipelines, and platform engineering practices. The validation workflow runs automatically; actual deployment requires Azure credentials.
+[![Deploy to Kubernetes](https://github.com/Parker2127/internal-developer-platform/actions/workflows/deploy.yml/badge.svg)](https://github.com/Parker2127/internal-developer-platform/actions/workflows/deploy.yml)
 
-A self-service platform enabling developers to deploy applications without infrastructure knowledge. Built with Kubernetes, Terraform, and GitHub Actions.
+A self-service platform enabling developers to deploy applications without infrastructure knowledge. Built with Kubernetes, Terraform, and GitHub Actions. **Live deployments run automatically on every push** using K3s in CI.
 
 ## 🎯 Project Goals
 

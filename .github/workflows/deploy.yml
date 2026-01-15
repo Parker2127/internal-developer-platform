@@ -1,9 +1,7 @@
-name: Deploy to AKS
+name: Deploy to Kubernetes
 
-# Portfolio Showcase Project
-# This workflow demonstrates IaC and CI/CD best practices
-# Deploy job is disabled - requires Azure subscription and credentials
-# Validation job runs to verify configuration integrity
+# Production-grade CI/CD pipeline with automated deployment to K3s
+# Validates infrastructure code and deploys to local Kubernetes cluster
 
 on:
   push:
@@ -12,9 +10,8 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-  RESOURCE_GROUP: idp-platform-rg
-  CLUSTER_NAME: idp-cluster
+  CLUSTER_NAME: idp-demo-cluster
+  NAMESPACE: default
 
 jobs:
   validate:
@@ -36,39 +33,72 @@ jobs:
     name: Deploy Application
     runs-on: ubuntu-latest
     needs: validate
-    # Skip actual deployment in portfolio showcase - requires Azure credentials
-    if: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
       
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-      
-      - name: Get AKS credentials
+      - name: Set up K3s
         run: |
-          az aks get-credentials \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --name ${{ env.CLUSTER_NAME }} \
-            --overwrite-existing
+          curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
+          mkdir -p ~/.kube
+          sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+          sudo chown $USER ~/.kube/config
+          echo "Waiting for K3s to be ready..."
+          sleep 15
+          kubectl wait --for=condition=Ready nodes --all --timeout=120s
+      
+      - name: Verify cluster
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+          kubectl get pods -A
       
       - name: Deploy to Kubernetes
         run: |
-          python3 scripts/deploy.py \
-            --app sample-app \
-            --manifest kubernetes/deployment.yaml \
-            --namespace default
+          kubectl apply -f kubernetes/deployment.yaml
+          kubectl apply -f kubernetes/service.yaml
       
-      - name: Apply Service
+      - name: Wait for deployment
         run: |
-          kubectl apply -f projects/internal-developer-platform/kubernetes/service.yaml
+          kubectl wait --for=condition=available --timeout=120s deployment/sample-app
+          kubectl get deployments
+          kubectl get pods
       
-      - name: Get Service Status
+      - name: Run health checks
         run: |
-          kubectl get svc sample-app -n default
+          echo "🏥 Running health checks..."
+          kubectl get pods -l app=sample-app -o wide
+          
+          # Check pod status
+          POD_STATUS=$(kubectl get pods -l app=sample-app -o jsonpath='{.items[0].status.phase}')
+          if [ "$POD_STATUS" != "Running" ]; then
+            echo "❌ Pod not running. Status: $POD_STATUS"
+            kubectl describe pods -l app=sample-app
+            exit 1
+          fi
+          
+          # Check readiness
+          READY=$(kubectl get pods -l app=sample-app -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}')
+          if [ "$READY" != "True" ]; then
+            echo "❌ Pod not ready"
+            kubectl describe pods -l app=sample-app
+            exit 1
+          fi
+          
+          echo "✅ All health checks passed!"
+      
+      - name: Get service status
+        run: |
+          kubectl get svc sample-app
+          kubectl describe svc sample-app
+      
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "📊 Deployment Summary"
+          echo "===================="
+          kubectl get all -l app=sample-app
+          echo ""
+          echo "📋 Recent events:"
+          kubectl get events --sort-by='.lastTimestamp' | tail -20
           kubectl get pods -l app=sample-app -n default
