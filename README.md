@@ -39,10 +39,10 @@ A self-service platform enabling developers to deploy applications without infra
                                                                   └──────┬───────┘
                                                                          │
                                                                          ▼
-┌─────────────┐      ┌──────────────┐      ┌─────────────┐      ┌──────────────┐
-│   Success/  │◀─────│ Health Check │◀─────│  Kubernetes │◀─────│              │
-│  Rollback   │      │  (probe pods)│      │   Deploy    │      │              │
-└─────────────┘      └──────────────┘      └─────────────┘      └──────────────┘
+┌─────────────┐      ┌──────────────┐      ┌─────────────┐◀─────────────┘
+│   Success/  │◀─────│ Health Check │◀─────│  Kubernetes │
+│  Rollback   │      │  (probe pods)│      │   Deploy    │
+└─────────────┘      └──────────────┘      └─────────────┘
 ```
 
 **Real deployment time:** 15 minutes average (tracked in metrics)
