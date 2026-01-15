@@ -1,5 +1,10 @@
 name: Deploy to AKS
 
+# Portfolio Showcase Project
+# This workflow demonstrates IaC and CI/CD best practices
+# Deploy job is disabled - requires Azure subscription and credentials
+# Validation job runs to verify configuration integrity
+
 on:
   push:
     branches:
@@ -31,6 +36,8 @@ jobs:
     name: Deploy Application
     runs-on: ubuntu-latest
     needs: validate
+    # Skip actual deployment in portfolio showcase - requires Azure credentials
+    if: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

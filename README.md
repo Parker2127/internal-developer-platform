@@ -1,5 +1,7 @@
 # Internal Developer Platform (IDP)
 
+> **Portfolio Showcase Project** - Demonstrates production-ready IaC, CI/CD pipelines, and platform engineering practices. The validation workflow runs automatically; actual deployment requires Azure credentials.
+
 A self-service platform enabling developers to deploy applications without infrastructure knowledge. Built with Kubernetes, Terraform, and GitHub Actions.
 
 ## 🎯 Project Goals
